@@ -6,8 +6,6 @@ library(stringi)
 library(readr)
 library(tidyr, warn.conflicts = FALSE)
 
-source("R/anonimize.R")
-
 ufmn_data_path <- "data/ufmn-2022_05_03.sqlite"
 
 ufmn_parse_na <- function(data, na_empty = FALSE) {
@@ -490,6 +488,6 @@ ufmn_export <- function(path, anonimize_data = TRUE) {
     if (anonimize_data) {
       data <- anonimize(data)
     }
-    write_csv(data, file.path(path, glue::glue("ufmn-{key}.csv")))
+    write_csv(data, file.path(path, paste("ufmn-", key, ".csv", sep = "")))
   }
 }
