@@ -406,6 +406,7 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
 
   exports <- list(
     "patients" = precisionals_patients,
+    "alsfrs_r" = precisionals_alsfrs,
     "nutrition" = precisionals_nutrition,
     "respiratory" = precisionals_respiratory,
     "genetics" = precisionals_genetics,
