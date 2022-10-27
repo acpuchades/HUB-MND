@@ -12,6 +12,8 @@ metrosud_problemas_data_path <- "data/metrosud-problemes-2022_08_26.xls"
 metrosud_variables_data_path <- "data/metrosud-variables-2022_08_26.xlsx"
 metrosud_visitas_data_path <- "data/metrosud-visites-2022_08_26.xls"
 
+source("R/anonimize.R")
+
 metrosud_cronic <- read_excel(metrosud_cronic_data_path) %>%
   rename(
     cip = CIP,
@@ -43,7 +45,6 @@ metrosud_problemas <- read_excel(metrosud_problemas_data_path) %>%
   ) %>%
   mutate(
     across(starts_with("fecha_"), as.Date, origin = "1900-01-01"),
-    cod_problema = str_replace(cod_problema, "C01-", ""),
   )
 
 metrosud_variables <- read_excel(metrosud_variables_data_path) %>%
@@ -75,7 +76,6 @@ metrosud_visitas <- read_excel(metrosud_visitas_data_path) %>%
   ) %>%
   mutate(
     across(starts_with("fecha_"), as.Date, origin = "1900-01-01"),
-    cod_problema = str_replace(cod_problema, "C01-", ""),
   )
 
 
@@ -97,6 +97,6 @@ metrosud_export <- function(path, anonimize_data = TRUE) {
     if (anonimize_data) {
       data <- anonimize(data)
     }
-    write_csv(data, file.path(path, paste("metrosud-", key, ".csv", sep = "")))
+    readr::write_csv(data, file.path(path, paste0("metrosud-", key, ".csv")))
   }
 }
