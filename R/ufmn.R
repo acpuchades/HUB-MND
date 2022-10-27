@@ -237,7 +237,6 @@ anonimize.ufmn <- function(data) {
     primer_apellido,
     segundo_apellido,
     dni,
-    cip,
     direccion,
     telefono_fijo,
     telefono_movil,
