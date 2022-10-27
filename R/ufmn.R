@@ -1,12 +1,14 @@
-library(dplyr, warn.conflicts = FALSE)
+library(dplyr)
 library(magrittr)
-library(purrr, warn.conflicts = FALSE)
+library(purrr)
 library(stringr)
 library(stringi)
 library(readr)
-library(tidyr, warn.conflicts = FALSE)
+library(tidyr)
 
-ufmn_data_path <- "data/ufmn-2022_05_03.sqlite"
+ufmn_data_path <- "data/ufmn-2022_10_18.sqlite"
+
+source("R/anonimize.R")
 
 ufmn_parse_na <- function(data, na_empty = FALSE) {
   if (na_empty) {
