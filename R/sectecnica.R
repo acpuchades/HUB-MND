@@ -1,7 +1,7 @@
-library(dplyr, warn.conflicts = FALSE)
-library(lubridate, warn.conflicts = FALSE)
+library(dplyr)
+library(lubridate)
 library(readxl)
-library(tidyr, warn.conflicts = FALSE)
+library(tidyr)
 
 sectecnica_data_path <- "data/sectecnica-2022_03_15.xlsx"
 
