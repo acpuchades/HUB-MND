@@ -255,7 +255,9 @@ ufmn_patients <- DBI::dbReadTable(ufmn_db, "pacientes") %>%
     ultima_ocupacion_al_inicio = ultima_ocupacion,
     estudios_otros = estudios_otro_cual
   ) %>%
-  mutate(across(everything(), ufmn_parse_na),
+  mutate(
+    across(everything(), ufmn_parse_na),
+    across(nhc, parse_integer),
     fecha_nacimiento = ufmn_parse_date(fecha_nacimiento),
     sexo = ufmn_parse_factor(sexo),
     exitus = ufmn_parse_logical(exitus, true = "Sí", false = "No"),

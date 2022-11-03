@@ -53,7 +53,9 @@ sectecnica_hosp <-
     servicio_alta = `Servei alta desc`
   ) %>%
   fill(nhc, episodio) %>%
-  mutate(across(starts_with("fecha"), ymd_hms),
+  mutate(
+    across(starts_with("fecha"), ymd_hms),
+    across(nhc, parse_integer),
     destino_al_alta = sectecnica_parse_discharge_type(destino_al_alta),
     codif_diagnostico =
       case_when(
@@ -85,6 +87,7 @@ sectecnica_urg <- read_excel(
   fill(nhc, episodio, fecha_entrada, fecha_salida) %>%
   mutate(
     across(starts_with("fecha"), ymd_hms),
+    across(nhc, parse_integer),
     across(
       c(cod_diagnostico, desc_diagnostico),
       ~ .x %>%
