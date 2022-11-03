@@ -420,6 +420,6 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
     if (anonimize_data) {
       data <- anonimize(data)
     }
-    write_csv(data, file.path(path, glue::glue("precisionals-{key}.csv")))
+    write_csv(data, file.path(path, paste0("precisionals-", key, ".csv")))
   }
 }
