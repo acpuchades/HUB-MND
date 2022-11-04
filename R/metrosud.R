@@ -12,8 +12,6 @@ metrosud_problemas_data_path <- "data/metrosud-problemes-2022_08_26.xls"
 metrosud_variables_data_path <- "data/metrosud-variables-2022_08_26.xlsx"
 metrosud_visitas_data_path <- "data/metrosud-visites-2022_08_26.xls"
 
-source("R/anonimize.R")
-
 metrosud_cronic <- read_excel(metrosud_cronic_data_path) %>%
   rename(
     cip = CIP,

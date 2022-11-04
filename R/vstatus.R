@@ -1,4 +1,3 @@
-source("R/anonimize.R")
 source("R/ufmn.R")
 source("R/dataentry.R")
 
