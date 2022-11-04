@@ -1,9 +1,9 @@
 library(dplyr)
 library(readr)
 
-source("R/anonimize.R")
 source("R/ufmn.R")
 source("R/sectecnica.R")
+source("R/imegen.R")
 
 precisionals_recode_sex <- function(data) {
   data %>% recode(
@@ -151,7 +151,6 @@ precisionals_patients <- ufmn_patients %>%
   rename(
     patient_id = pid,
     hospital_id = nhc,
-    ihc_id = cip,
     birthdate = fecha_nacimiento,
     zip_code = codigo_postal,
     first_visit = fecha_primera_visita,
@@ -399,6 +398,27 @@ precisionals_respiratory <- ufmn_respiratory %>%
     niv_stopped_reason_other = motivo_retirada_vmi_otros
   )
 
+precisionals_genetics_ext <- imegen_results %>%
+  rename(
+    hospital_id = "nhc",
+    geneset = "panel",
+    gene = "gen",
+    allele1 = "alelo1",
+    allele2 = "alelo2",
+    genotype = "genotipo",
+    inheritance = "herencia",
+    interpretation = "interpretacion",
+  ) %>%
+  mutate(
+    genotype = recode(genotype, heterocigosis = "heterozygous"),
+    interpretation = recode(interpretation,
+      "Probablemente Patogénica" = "Likely pathogenic",
+      "Significado clinico incierto" = "Uncertain significance",
+      "Factor de riesgo / susceptibilidad" = "Risk factor / susceptibility"
+    )
+  ) %>%
+  select(-imegen_id)
+
 precisionals_export <- function(path, anonimize_data = TRUE) {
   if (!file.exists(path)) {
     dir.create(path, recursive = TRUE)
@@ -410,6 +430,7 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
     "nutrition" = precisionals_nutrition,
     "respiratory" = precisionals_respiratory,
     "genetics" = precisionals_genetics,
+    "genetics_ext" = precisionals_genetics_ext,
     "er_episodes" = precisionals_er_episodes,
     "er_diagnoses" = precisionals_er_diagnoses,
     "hospitalizations" = precisionals_hosp
