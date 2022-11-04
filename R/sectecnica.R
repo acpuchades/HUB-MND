@@ -55,7 +55,6 @@ sectecnica_hosp <-
   fill(nhc, episodio) %>%
   mutate(
     across(starts_with("fecha"), ymd_hms),
-    across(nhc, parse_integer),
     destino_al_alta = sectecnica_parse_discharge_type(destino_al_alta),
     codif_diagnostico =
       case_when(
@@ -65,6 +64,7 @@ sectecnica_hosp <-
   ) %>%
   relocate(codif_diagnostico, .before = cod_diagnostico) %>%
   rows_delete(tibble(nhc = "Total general"), by = "nhc") %>%
+  mutate(across(nhc, parse_integer)) %>%
   arrange(nhc, fecha_ingreso)
 
 sectecnica_urg <- read_excel(
@@ -87,7 +87,6 @@ sectecnica_urg <- read_excel(
   fill(nhc, episodio, fecha_entrada, fecha_salida) %>%
   mutate(
     across(starts_with("fecha"), ymd_hms),
-    across(nhc, parse_integer),
     across(
       c(cod_diagnostico, desc_diagnostico),
       ~ .x %>%
@@ -103,6 +102,8 @@ sectecnica_urg <- read_excel(
       )
   ) %>%
   relocate(codif_diagnostico, .before = cod_diagnostico) %>%
+  rows_delete(tibble(nhc = "Total general"), by = "nhc") %>%
+  mutate(across(nhc, parse_integer)) %>%
   arrange(nhc, fecha_entrada)
 
 sectecnica_urg_episodios <- sectecnica_urg %>%
