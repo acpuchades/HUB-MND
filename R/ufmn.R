@@ -234,16 +234,16 @@ ufmn_parse_peg_usage <- function(data) {
 }
 
 anonimize.ufmn <- function(data) {
-  data %>% select(!c(
-    nombre,
-    primer_apellido,
-    segundo_apellido,
-    dni,
-    cip,
-    direccion,
-    telefono_fijo,
-    telefono_movil,
-  ))
+  data %>% select(-any_of(c(
+    "nombre",
+    "primer_apellido",
+    "segundo_apellido",
+    "dni",
+    "cip",
+    "direccion",
+    "telefono_fijo",
+    "telefono_movil"
+  )))
 }
 
 ufmn_db <- DBI::dbConnect(RSQLite::SQLite(), ufmn_data_path)

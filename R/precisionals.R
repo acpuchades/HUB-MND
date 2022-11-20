@@ -2,8 +2,9 @@ library(dplyr)
 library(readr)
 
 source("R/ufmn.R")
-source("R/sectecnica.R")
 source("R/imegen.R")
+source("R/metrosud.R")
+source("R/sectecnica.R")
 
 precisionals_recode_sex <- function(data) {
   data %>% recode(
@@ -419,21 +420,59 @@ precisionals_genetics_ext <- imegen_results %>%
   ) %>%
   select(-imegen_id)
 
+precisionals_comorbidities <- ufmn_patients %>%
+  mutate(cip_parcial = substr(cip, 1, 13)) %>%
+  inner_join(metrosud_problemas, by = "cip_parcial") %>%
+  select(
+    patient_id = pid,
+    dx_date = fecha_problema,
+    dx_code = cod_problema,
+    dx_encoding = codif_problema,
+    dx_description = desc_problema
+  )
+
+precisionals_gp_visits <- ufmn_patients %>%
+  mutate(cip_parcial = substr(cip, 1, 13)) %>%
+  inner_join(metrosud_visitas, by = "cip_parcial") %>%
+  select(
+    patient_id = pid,
+    date = fecha_visita,
+    dx_code = cod_problema,
+    dx_encoding = codif_problema,
+    dx_description = desc_problema
+  )
+
+precisionals_treatments <- ufmn_patients %>%
+  mutate(cip_parcial = substr(cip, 1, 13)) %>%
+  inner_join(metrosud_farmacia, by = "cip_parcial") %>%
+  select(
+    patient_id = pid,
+    prescription_start = fecha_inicio,
+    prescription_end = fecha_fin,
+    product_code = cod_producto,
+    product_description = desc_producto,
+    actcompound_code = cod_principio,
+    actcompound_description = desc_principio
+  )
+
 precisionals_export <- function(path, anonimize_data = TRUE) {
   if (!file.exists(path)) {
     dir.create(path, recursive = TRUE)
   }
 
   exports <- list(
-    "patients" = precisionals_patients,
     "alsfrs_r" = precisionals_alsfrs,
-    "nutrition" = precisionals_nutrition,
-    "respiratory" = precisionals_respiratory,
+    "comorbidities" = precisionals_comorbidities,
+    "er_diagnoses" = precisionals_er_diagnoses,
+    "er_episodes" = precisionals_er_episodes,
     "genetics" = precisionals_genetics,
     "genetics_ext" = precisionals_genetics_ext,
-    "er_episodes" = precisionals_er_episodes,
-    "er_diagnoses" = precisionals_er_diagnoses,
-    "hospitalizations" = precisionals_hosp
+    "hospitalizations" = precisionals_hosp,
+    "gp_visits" = precisionals_gp_visits,
+    "nutrition" = precisionals_nutrition,
+    "patients" = precisionals_patients,
+    "respiratory" = precisionals_respiratory,
+    "treatments" = precisionals_treatments
   )
 
   for (key in names(exports)) {
