@@ -242,8 +242,7 @@ precisionals_er_diagnoses <- sectecnica_urg_diagnosticos %>%
   drop_na(dx_code)
 
 precisionals_genetics <- ufmn_clinical %>%
-  select(c(pid, starts_with("estudio_gen_"))) %>%
-  rename(
+  select(
     patient_id = pid,
     c9_status = estudio_gen_c9,
     sod1_status = estudio_gen_sod1,
@@ -256,7 +255,10 @@ precisionals_genetics <- ufmn_clinical %>%
   )
 
 precisionals_hosp <- sectecnica_hosp %>%
-  rename(
+  mutate(
+    discharge_type = precisionals_recode_discharge_type(destino_al_alta),
+  ) %>%
+  select(
     hospital_id = nhc,
     episode_id = episodio,
     admission_date = fecha_ingreso,
@@ -264,34 +266,17 @@ precisionals_hosp <- sectecnica_hosp %>%
     dx_code = cod_diagnostico,
     dx_description = desc_diagnostico,
     discharge_date = fecha_alta,
+    discharge_type,
     discharge_dept = servicio_alta,
     destination_centre = centro_destino_al_alta
-  ) %>%
-  mutate(
-    discharge_type = precisionals_recode_discharge_type(destino_al_alta),
-    .keep = "unused",
-  ) %>%
-  relocate(hospital_id, .before = everything()) %>%
-  relocate(starts_with("discharge_"), .after = starts_with("dx_"))
+  )
 
 precisionals_nutrition <- ufmn_nutrition %>%
-  select(!c(
-    laxante_cual,
-    espesante_cual,
-    aporte_kcal_extra,
-    aporte_kcal_extra_tomado,
-    aporte_kcal_extra_tomado_entero,
-    aporte_kcal_extra_prescrito_entero,
-    test_eat10,
-    modificacion_textura,
-    modificacion_textura_otra,
-    alsspuntuacion,
-    motivo_retirada_peg,
-    ends_with("_cual"),
-    ends_with("_otro"),
-    ends_with("_otros")
-  )) %>%
-  rename(
+  mutate(
+    dysphagia = precisionals_recode_dysphagia(disfagia),
+    peg_usage = precisionals_recode_peg_usage(uso_peg)
+  ) %>%
+  select(
     patient_id = pid,
     assessment_date = fecha_visita,
     weight = peso,
@@ -308,10 +293,12 @@ precisionals_nutrition <- ufmn_nutrition %>%
     peg_carrier = portador_peg,
     peg_placement_date = fecha_colocacion_peg,
     peg_placement_weight = peso_colocacion_peg,
+    peg_usage,
     peg_complication = complicacion_peg,
     peg_complication_date = fecha_complicacion_peg,
     peg_removal = retirada_peg,
     peg_removal_date = fecha_retirada_peg,
+    dysphagia,
     food_thickener = espesante,
     food_thickener_start = fecha_inicio_espesante,
     oral_suppl = supl_oral,
@@ -320,23 +307,10 @@ precisionals_nutrition <- ufmn_nutrition %>%
     enteral_suppl_start = fecha_inicio_supl_enteral,
     constipation = estreñimiento,
     laxative_usage = laxante,
-  ) %>%
-  mutate(
-    dysphagia = precisionals_recode_dysphagia(disfagia),
-    peg_usage = precisionals_recode_peg_usage(uso_peg),
-    .keep = "unused",
   )
 
 precisionals_respiratory <- ufmn_respiratory %>%
-  select(!c(
-    patologia_respiratoria_previa,
-    tipo_patologia_respiratoria_nsnc,
-    cumplimiento_cpap,
-    motivo_colocacion_vmni,
-    ends_with("_cual"),
-    sas_no,
-  )) %>%
-  rename(
+  select(
     patient_id = pid,
     assessment_date = fecha_visita,
     copd_history = tipo_patologia_respiratoria_epoc,
@@ -363,7 +337,7 @@ precisionals_respiratory <- ufmn_respiratory %>%
     npo_odi3 = odi3,
     polisomnography_performed = polisomnografia,
     polisomnography_date = fecha_realizacion_polisomnografia,
-    psg_ct90 = ct90,
+    psg_ct90 = ct90_polisomnografia,
     psg_ahi = iah,
     psg_apneas_obstr = sas_apneas_obstructivas,
     psg_apneas_nonobstr = sas_apneas_no_claramente_obstructivas,
@@ -400,25 +374,27 @@ precisionals_respiratory <- ufmn_respiratory %>%
   )
 
 precisionals_genetics_ext <- imegen_results %>%
-  rename(
-    hospital_id = "nhc",
-    geneset = "panel",
-    gene = "gen",
-    allele1 = "alelo1",
-    allele2 = "alelo2",
-    genotype = "genotipo",
-    inheritance = "herencia",
-    interpretation = "interpretacion",
-  ) %>%
+  left_join(ufmn_patients, by = "nhc") %>%
   mutate(
-    genotype = recode(genotype, heterocigosis = "heterozygous"),
-    interpretation = recode(interpretation,
+    genotype = recode(genotipo, heterocigosis = "heterozygous"),
+    interpretation = recode(interpretacion,
       "Probablemente Patogénica" = "Likely pathogenic",
       "Significado clinico incierto" = "Uncertain significance",
       "Factor de riesgo / susceptibilidad" = "Risk factor / susceptibility"
     )
   ) %>%
-  select(-imegen_id)
+  select(
+    hospital_id = nhc,
+    geneset = panel,
+    gene = gen,
+    allele1 = alelo1,
+    allele2 = alelo2,
+    HGVSc,
+    HGVSp,
+    genotype,
+    inheritance = herencia,
+    interpretation
+  )
 
 precisionals_comorbidities <- ufmn_patients %>%
   mutate(cip_parcial = substr(cip, 1, 13)) %>%
