@@ -373,7 +373,14 @@ precisionals_respiratory <- ufmn_respiratory %>%
     niv_stopped_reason_other = motivo_retirada_vmi_otros
   )
 
-precisionals_genetics_ext <- imegen_results %>%
+precisionals_genesets <- imegen_paneles %>%
+  rename(
+    geneset = panel,
+    gene = gen,
+    transcript = transcrito
+  )
+
+precisionals_genetics_ext <- imegen_resultados %>%
   left_join(ufmn_patients, by = "nhc") %>%
   mutate(
     genotype = recode(genotipo, heterocigosis = "heterozygous"),
@@ -441,6 +448,7 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
     "comorbidities" = precisionals_comorbidities,
     "er_diagnoses" = precisionals_er_diagnoses,
     "er_episodes" = precisionals_er_episodes,
+    "genesets" = precisionals_genesets,
     "genetics" = precisionals_genetics,
     "genetics_ext" = precisionals_genetics_ext,
     "hospitalizations" = precisionals_hosp,
