@@ -13,7 +13,7 @@ imegen_paneles <-
     )
 
 imegen_resultados <-
-    readxl::read_excel(imegen_data_path) %>%
+    readxl::read_excel(imegen_results_data_path) %>%
     rename(
         imegen_id = ID,
         nhc = NHC,
