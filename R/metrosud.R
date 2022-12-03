@@ -61,10 +61,12 @@ metrosud_variables <- read_excel(metrosud_variables_data_path) %>%
     desc_variable = recode(desc_variable,
       `INDEX DE BARTHEL: 55 O MENYS` = "Index de Barthel",
       `Escala de BARTHEL. Activitat vida diària` = "Index de Barthel",
+      `RESULTAT DE BARTHEL` = "Index de Barthel",
       `DEMÈNCIA Y DETERIORAMENT COGNITIU (TEST COGNITIU DE PFEIFFER: 5 O MÉS ERRORS)` = "Index de Pfeiffer",
       `Test de PFEIFFER. Val. Mental.` = "Index de Pfeiffer",
       `Test de LAWTON-BRODY` = "Index de Lawton-Brody",
       `IMC - Índex de Massa Corporal` = "Index de Massa Corporal",
+      `LDL- Colesterol` = "LDL-Colesterol",
     )
   )
 
