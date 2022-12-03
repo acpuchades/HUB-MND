@@ -84,5 +84,6 @@ fmv_data <- readxl::read_excel(fmv_data_path) %>%
         dplyr::across(dplyr::starts_with("cuidador_"), fmv_recode_boolean),
         nif = stringr::str_replace_all(nif, r"(-|\s)", ""),
         situacion_laboral = fmv_recode_workingstatus(situacion_laboral),
-        grado_lapad = factor(grado_lapad, levels = c("I", "II", "III"), ordered = TRUE)
+        grado_lapad = factor(grado_lapad, levels = c("I", "II", "III"), ordered = TRUE),
+        tipo_incapacidad = fmv_recode_disability(tipo_incapacidad),
     )

@@ -1,20 +1,21 @@
 library(dplyr)
 library(readr)
 
+source("R/fmv.R")
 source("R/ufmn.R")
 source("R/imegen.R")
 source("R/metrosud.R")
 source("R/sectecnica.R")
 
 precisionals_recode_sex <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Hombre = "Male",
     Mujer = "Female"
   )
 }
 
 precisionals_recode_studies <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Otros = "Other",
     Analfabeto = "Illiterate",
     `Primarios incompletos` = "Primary education (incomplete)",
@@ -27,7 +28,7 @@ precisionals_recode_studies <- function(data) {
 }
 
 precisionals_recode_working_status <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Otros = "Other",
     Trabaja = "Working",
     `Labores de la casa` = "Working at home",
@@ -39,7 +40,7 @@ precisionals_recode_working_status <- function(data) {
 }
 
 precisionals_recode_phenotype <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     AMP = "PMA",
     ELP = "PLS",
     `ELA Bulbar` = "Bulbar",
@@ -53,7 +54,7 @@ precisionals_recode_phenotype <- function(data) {
 }
 
 precisionals_recode_smoking_status <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Fumador = "Active",
     Exfumador = "Ceased",
     `No fumador` = "Never"
@@ -61,7 +62,7 @@ precisionals_recode_smoking_status <- function(data) {
 }
 
 precisionals_recode_cognitive_status <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     DTA = "AD",
     DFT = "FTD",
     `DCL-Cognitivo` = "MCI",
@@ -72,7 +73,7 @@ precisionals_recode_cognitive_status <- function(data) {
 }
 
 precisionals_recode_weakness_pattern <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Respiratoria = "Respiratory",
     MMSS = "Upper limbs",
     MMII = "Lower limbs",
@@ -81,7 +82,7 @@ precisionals_recode_weakness_pattern <- function(data) {
 }
 
 precisionals_recode_mn_involvement <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Ninguno = "None",
     MNS = "UMN",
     MNI = "LMN",
@@ -90,7 +91,7 @@ precisionals_recode_mn_involvement <- function(data) {
 }
 
 precisionals_recode_discharge_type <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     `Alta voluntaria` = "DAMA",
     Domicilio = "Planned",
     Fuga = "Abscond",
@@ -104,11 +105,11 @@ precisionals_recode_discharge_type <- function(data) {
 }
 
 precisionals_recode_genetic_result <- function(data) {
-  data %>% recode(Alterado = "Altered")
+  data %>% recode_factor(Alterado = "Altered")
 }
 
 precisionals_recode_dysphagia <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     No = "None",
     Liquidos = "Liquids",
     Solidos = "Solids",
@@ -117,12 +118,58 @@ precisionals_recode_dysphagia <- function(data) {
 }
 
 precisionals_recode_peg_usage <- function(data) {
-  data %>% recode(
+  data %>% recode_factor(
     Hidratacion = "Hydration",
     `Hidratacion + Medicacion` = "Hydration + Medication",
     `Hidratacion + Medicacion + Nutricion parcial` =
       "Hydration + Medication + Parcial nutrition",
     `Nutricion completa` = "Complete nutrition"
+  )
+}
+
+precisionals_recode_gpvars_names <- function(data) {
+  data %>% recode_factor(
+    ABVDB = "Barthel",
+    SITEN06 = "Barthel",
+    SITGE05 = "Barthel",
+    AIVDL = "Lawton-Brody",
+    VMTPF = "Pfeiffer",
+    SITGE06 = "Pfeiffer",
+    TT102 = "Weight",
+    TT103 = "BMI",
+    .default = NA_character_
+  )
+}
+
+precisionals_recode_income_source <- function(data) {
+  data %>% recode_factor(
+    `No ingresos` = "None",
+    `En paro` = "Unemployment aid",
+    Trabaja = "Work",
+    `Baja laboral` = "Sick leave",
+    Jubilacion = "Retirement",
+    Incapacidad = "Disability aid",
+    `Pension no contributiva` = "Disability aid",
+    `Pension de viudedad` = "Widowhood aid",
+    `Seguro obligatorio vejez e invalidez` = "Other government aids"
+  )
+}
+
+precisionals_recode_application_status <- function(data) {
+  data %>% recode_factor(
+    Tramitada = TRUE,
+    `Pendiente` = FALSE,
+    `No tramitada` = FALSE
+  )
+}
+
+precisionals_recode_disability_level <- function(data) {
+  data %>% recode_factor(
+    IT = "Temporary",
+    IPP = "Partial",
+    IPT = "Total",
+    IPA = "Absolute",
+    GI = "Absolute"
   )
 }
 
@@ -414,7 +461,7 @@ precisionals_comorbidities <- ufmn_patients %>%
     dx_description = desc_problema
   )
 
-precisionals_gp_visits <- ufmn_patients %>%
+precisionals_gpvisits <- ufmn_patients %>%
   mutate(cip_parcial = substr(cip, 1, 13)) %>%
   inner_join(metrosud_visitas, by = "cip_parcial") %>%
   select(
@@ -438,6 +485,39 @@ precisionals_treatments <- ufmn_patients %>%
     actcompound_description = desc_principio
   )
 
+precisionals_social <- ufmn_patients %>%
+  inner_join(fmv_data, by = c("dni" = "nif")) %>%
+  mutate(
+    across(c(starts_with("estado_")), precisionals_recode_application_status),
+    situacion_laboral = precisionals_recode_income_source(situacion_laboral),
+    tipo_incapacidad = precisionals_recode_disability_level(tipo_incapacidad),
+  ) %>%
+  select(
+    patient_id = pid,
+    income_source = situacion_laboral,
+    has_family_caregiver = cuidador_familiar,
+    has_profesional_caregiver = cuidador_profesional,
+    disability_requested = estado_incapacidad,
+    disability_request_date = fecha_tramite_incapacidad,
+    disability_level = tipo_incapacidad,
+    dependency_requested = estado_lapad,
+    dependency_request_date = fecha_tramite_lapad,
+    dependency_degree = grado_lapad,
+  )
+
+precisionals_gpvars <- ufmn_patients %>%
+  mutate(cip_parcial = substr(cip, 1, 13)) %>%
+  inner_join(metrosud_variables, by = "cip_parcial") %>%
+  mutate(
+    var_name = precisionals_recode_gpvars_names(cod_variable),
+  ) %>%
+  select(
+    patient_id = pid,
+    date = fecha_registro,
+    var_name, value = valor
+  ) %>%
+  drop_na(patient_id, var_name)
+
 precisionals_export <- function(path, anonimize_data = TRUE) {
   if (!file.exists(path)) {
     dir.create(path, recursive = TRUE)
@@ -452,10 +532,12 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
     "genetics" = precisionals_genetics,
     "genetics_ext" = precisionals_genetics_ext,
     "hospitalizations" = precisionals_hosp,
-    "gp_visits" = precisionals_gp_visits,
+    "gpvisits" = precisionals_gpvisits,
+    "gpvars" = precisionals_gpvars,
     "nutrition" = precisionals_nutrition,
     "patients" = precisionals_patients,
     "respiratory" = precisionals_respiratory,
+    "social" = precisionals_social,
     "treatments" = precisionals_treatments
   )
 
