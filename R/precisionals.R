@@ -1,8 +1,9 @@
 library(dplyr)
 library(readr)
 
-source("R/fmv.R")
 source("R/ufmn.R")
+source("R/fmv.R")
+source("R/pram.R")
 source("R/imegen.R")
 source("R/metrosud.R")
 source("R/sectecnica.R")
@@ -237,9 +238,15 @@ precisionals_patients <- ufmn_patients %>%
       arrange(fecha_visita, .by_group = TRUE) %>%
       summarize(fecha_inicio = first(fecha_visita)) %$%
       fecha_inicio,
+    death_cause = ufmn_patients %>%
+      left_join(pram_cases, by = "cip") %$%
+      case_when(
+        estado == "Expedient finalitzat" ~ "euthanasia"
+      ),
     .keep = "unused",
   ) %>%
-  relocate(site, .before = everything())
+  relocate(site, .before = everything()) %>%
+  relocate(death_cause, .after = death_date)
 
 precisionals_alsfrs <- ufmn_functional %>%
   rename(
@@ -546,6 +553,8 @@ precisionals_export <- function(path, anonimize_data = TRUE) {
     if (anonimize_data) {
       data <- anonimize(data)
     }
-    write_csv(data, file.path(path, paste0("precisionals-", key, ".csv")))
+
+    output_path <- file.path(path, paste0("precisionals-", key, ".csv"))
+    write_csv(data, output_path)
   }
 }
