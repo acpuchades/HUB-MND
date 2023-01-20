@@ -8,7 +8,7 @@ library(tidyr)
 
 source("R/anonimize.R")
 
-ufmn_data_path <- "data/ufmn-2022_10_18.sqlite"
+ufmn_data_path <- "data/ufmn-2023_01_18.sqlite"
 
 ufmn_parse_na <- function(data, na_empty = FALSE) {
   if (na_empty) {
