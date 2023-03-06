@@ -39,5 +39,8 @@ vignettes/*.pdf
 .Renviron
 
 # Data folders
-/data/
-/output/
+data/
+output/
+
+# Data files
+*.xlsx
