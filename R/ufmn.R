@@ -344,7 +344,7 @@ ufmn_nutrition <- DBI::dbReadTable(ufmn_db, "datos_antro") %>%
     supl_enteral = suplementacion_nutricional_entera,
   ) %>%
   rows_update(tibble(id = "40c68842-eeb1-4cd2-a0d8-c5cbc839730c", fecha_visita = NA), by = "id") %>% # was '99-99-9999'
-  rows_update(tibble(id = "67e615f4-5f01-11eb-a21b-8316bff80df0", fecha_visita = "03-12-2021"), by = "id") %>% # was 03-12-20219
+  rows_update(tibble(id = "67e615f4-5f01-11eb-a21b-8316bff80df0", fecha_visita = "03-12-2019"), by = "id") %>% # was 03-12-20219
   rows_update(tibble(id = "f9054526-1dcc-11eb-bb4a-9745fc970131", fecha_indicacion_peg = "23-10-2020"), by = "id") %>% # was 23-10-20020
   rows_update(tibble(id = "8c5b0f46-df7a-11e9-9c30-274ab37b3217", fecha_indicacion_peg = "20-07-3018"), by = "id") %>% # was 20-07-3018
   rows_update(tibble(id = "eb700688-3dfe-11eb-9383-d3a3b2195eff", fecha_complicacion_peg = "22-11-2020"), by = "id") %>% # was 22-11-202
@@ -420,8 +420,8 @@ ufmn_functional <- DBI::dbReadTable(ufmn_db, "esc_val_ela") %>%
   arrange(pid, fecha_visita)
 
 ufmn_followups <- ufmn_functional %>%
-  full_join(ufmn_nutrition, by = c("pid", "fecha_visita")) %>%
-  full_join(ufmn_respiratory, by = c("pid", "fecha_visita")) %>%
+  full_join(ufmn_nutrition, by = c("pid", "fecha_visita"), multiple = "all") %>%
+  full_join(ufmn_respiratory, by = c("pid", "fecha_visita"), multiple = "all") %>%
   group_by("pid") %>%
   fill() %>%
   ungroup() %>%
@@ -438,7 +438,7 @@ ufmn_followups <- ufmn_functional %>%
     kings_c = case_when(
       disnea == 0 | insuf_resp < 4 ~ "4B",
       indicacion_peg == TRUE ~ "4A",
-      TRUE ~ {
+      indicacion_peg == FALSE ~ {
         bulbar <- any(c(lenguaje, salivacion, deglucion) < 4)
         upper <- any(c(escritura, cortar_sin_peg) < 4)
         lower <- caminar < 4
@@ -456,7 +456,7 @@ ufmn_followups <- ufmn_functional %>%
   select(pid, fecha_visita, cortar, kings_c, mitos)
 
 ufmn_functional %<>%
-  left_join(ufmn_followups, by = c("pid", "fecha_visita")) %>%
+  left_join(ufmn_followups, by = c("pid", "fecha_visita"), multiple = "all") %>%
   mutate(
     cortar_con_peg = ifelse(cortar == cortar_con_peg, cortar_con_peg, NA),
     cortar_sin_peg = ifelse(cortar == cortar_sin_peg, cortar_sin_peg, NA)
